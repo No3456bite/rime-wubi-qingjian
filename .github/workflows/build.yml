@@ -23,6 +23,17 @@ jobs:
           mkdir -p /tmp/qingjian-smoke
           unzip -q dist/hamster-wubi86-qingjian.zip -d /tmp/qingjian-smoke
           printf '苹果\n' | opencc -c /tmp/qingjian-smoke/opencc/qingjian_en.json | grep -i apple
+      - name: Validate and build native-clear iOS keyboard skin
+        run: |
+          python3 scripts/build_skin.py --check
+          python3 scripts/build_skin.py
+      - name: Upload native-clear Hamster theme
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-clear-ios-skin
+          path: dist/native-clear-ios.hskin
+          if-no-files-found: error
+          retention-days: 90
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
