@@ -124,6 +124,16 @@ def make_keyboard(palette: dict, kind: str, landscape: bool = False) -> dict:
             "cornerRadius": 6.5, "normalLowerEdgeColor": palette["edge"],
         },
     }
+    # Official Hamster v2 layout requires a keyboardStyle entry for the region.
+    # Without it, key backgrounds can render over an opaque/default area.
+    result["keyboardStyle"] = {"backgroundStyle": "keyboardBackground"}
+    result["keyboardBackground"] = {
+        "type": "original",
+        "normalColor": palette["board"],
+        "highlightColor": palette["board"],
+    }
+    result["toolbar"]["backgroundStyle"] = "keyboardBackground"
+    result["preedit"]["backgroundStyle"] = "keyboardBackground"
     rows: list[dict] = []
     def add_button(name: str, label: str, action: object, style: str,
                    width: float, font_size: float = 21) -> tuple[str, float]:
@@ -250,6 +260,9 @@ def validate(files: dict[str, bytes]) -> None:
                     assert doc["spaceKey"]["action"] == "space"
                     assert doc["enterKey"]["action"] == "enter"
                     assert doc["deleteKey"]["action"] == "backspace"
+                    assert doc["keyboardStyle"]["backgroundStyle"] in doc
+                    assert doc["toolbar"]["backgroundStyle"] in doc
+                    assert doc["preedit"]["backgroundStyle"] in doc
 
 def pack(output: Path, files: dict[str, bytes], prefix: str = "") -> None:
     """Make a real .hskin or a folder-wrapped ZIP for manual file-manager imports."""
