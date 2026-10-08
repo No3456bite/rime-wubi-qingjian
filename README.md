@@ -40,19 +40,20 @@
 4. 在仓的「键盘皮肤」中应该只出现一个名为「原生·清晰」的项目（而不是独立的「dark」「light」），选中并启用。
 5. **继续保持「键盘设置 → 候选栏设置 → 显示候选 Comment」开启**，否则英文释义依然不可见。
 
-**报错：`config.yaml` 不存在，同时皮肤列表出现 `dark`、`light` 两项。** 这代表明暗子目录被当成了皮肤根目录。删除误导入的这两项，然后按照上面的步骤从 iOS「文件」共享**未解压的 `.hskin` 文件**给仓。完整皮肤的目录结构必须是：
+**关于此前 v1/v2 的报错：** 旧版 `.hskin` 把 `config.yaml`、`dark/`、`light/` 直接放在压缩包根目录；仓把 `dark`、`light` 误当成独立皮肤，报找不到 `config.yaml`。这不是 Rime 字典的问题，也不需要重新部署 Rime。用户已证实社区「26键·万象」能正常导入；2026-10-09 检查其发布的原始 `.hskin` 后确认正确封装是**根目录唯一皮肤文件夹**。从 v3 开始严格参照此结构：
 
 ```text
-native-clear-ios.hskin   ← 作为整个文件分享给仓（不要解压）
-├── config.yaml          ← 位于 .hskin ZIP 根目录
-├── light/
-│   └── qwerty_portrait.yaml
-└── dark/
-    └── qwerty_portrait.yaml
+native-clear-ios.hskin   ← 将 .hskin 文件整体交给仓导入，不要解压
+└── native-clear-ios/    ← 关键：多这一层皮肤文件夹
+    ├── config.yaml
+    ├── light/
+    │   └── qwerty_portrait.yaml
+    └── dark/
+        └── qwerty_portrait.yaml
 ```
 
-构建产物还附带 `native-clear-ios-folder.zip`，供熟悉仓文件管理的高级用户在需要手动复制**完整皮肤文件夹**时使用；其内部多一层 `native-clear-ios/` 目录，不要将它误认为官方标准的 `.hskin` 文件。
- 
+**如果之前装过 v1/v2：** 在仓的「键盘皮肤」里删除报错的 `dark`、`light` 两项，再导入新包。安装后的排版还需 iPhone 真机验证；有异常先换回原皮肤。皮肤只影响显示，不会清空词库。
+
 此皮肤不会更改 `wubi86_qj` 的输入词库，也不绑定别的拼音方案。首次版本通过静态配置检查，但尚未在实际 iPhone 上验证皮肤导入与具体显示效果；若布局偏移或功能键失效，请暂时切回原皮肤并反馈截图。
  
 可在本地用 `python3 scripts/build_skin.py` 构建 `dist/native-clear-ios.hskin`，用 `--check` 检查布局引用。无需联网或额外 Python 依赖。
