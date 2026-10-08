@@ -34,6 +34,13 @@ jobs:
           path: dist/native-clear-ios.hskin
           if-no-files-found: error
           retention-days: 90
+      - name: Upload manually installable skin folder ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-clear-ios-folder
+          path: dist/native-clear-ios-folder.zip
+          if-no-files-found: error
+          retention-days: 90
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
