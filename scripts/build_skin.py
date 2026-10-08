@@ -288,7 +288,6 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--check", action="store_true")
     p.add_argument("--output", default="dist/native-clear-ios.hskin")
-    p.add_argument("--folder-output", default="dist/native-clear-ios-folder.zip")
     args = p.parse_args()
     files = make_files()
     validate(files)
@@ -296,11 +295,20 @@ def main() -> None:
         print("PASS skin validation: 12 keyboard configurations + manifest, no unresolved keys")
         return
     official = Path(args.output)
-    folder_zip = Path(args.folder_output)
-    pack(official, files)  # Canonical .hskin, root-level config.yaml. Share to Hamster.
-    pack(folder_zip, files, "native-clear-ios/")  # Folder import fallback.
+    # Confirmed from published, working 26键-万象.hskin by BlackCCCat:
+    # .hskin root contains ONE named theme directory; config.yaml goes INSIDE it.
+    # Earlier flat ZIP variants incorrectly imported light/ and dark/ as themes.
+    theme_dir = "native-clear-ios/"
+    pack(official, files, theme_dir)
+    with zipfile.ZipFile(official) as package:
+        members = package.namelist()
+        assert all(name.startswith(theme_dir) for name in members)
+        assert "config.yaml" not in members
+        assert theme_dir + "config.yaml" in members
+        assert theme_dir + "dark/qwerty_portrait.yaml" in members
+        assert theme_dir + "light/qwerty_portrait.yaml" in members
     print(f"Built {official} ({official.stat().st_size:,} bytes)")
-    print(f"Built {folder_zip} ({folder_zip.stat().st_size:,} bytes)")
+    print("Confirmed: one theme root directory, config.yaml inside it")
 
 if __name__ == "__main__":
     main()
