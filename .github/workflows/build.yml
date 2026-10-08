@@ -18,6 +18,11 @@ jobs:
         run: python3 -m unittest discover -s tests -v
       - name: Build installable package
         run: python3 scripts/build.py
+      - name: Smoke test English translations in compiled OpenCC
+        run: |
+          mkdir -p /tmp/qingjian-smoke
+          unzip -q dist/hamster-wubi86-qingjian.zip -d /tmp/qingjian-smoke
+          printf '苹果\n' | opencc -c /tmp/qingjian-smoke/opencc/qingjian_en.json | grep -i apple
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
