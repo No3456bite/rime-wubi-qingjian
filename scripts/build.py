@@ -183,6 +183,8 @@ def main() -> None:
             "opencc/qingjian_en.json":
                 (json.dumps(config, indent=2, ensure_ascii=False) + "\n").encode(),
             "opencc/" + filename: payload,
+            "licenses/QINGJIAN_GPL.txt":
+                (Path(__file__).resolve().parents[1] / "LICENSE").read_bytes(),
             "licenses/RIME_WUBI_LGPL.txt": wubi_license,
             "licenses/SOURCES.txt":
                 (f"Qingjian: {QINGJIAN_URL}\nLicense: GPL-3.0-or-later\n"
