@@ -35,9 +35,23 @@
 **安装（与词库分开，不需要再次部署 Rime）**：
  
 1. 在 [GitHub Actions](https://github.com/No3456bite/rime-wubi-qingjian/actions) 打开最新成功的 `Build Hamster Wubi86 + English Gloss`，下载 `native-clear-ios-skin` 构建产物（GitHub 会下载外层 ZIP）。
-2. 在 iPhone「文件」中解压外层 ZIP，取得里面的 `native-clear-ios.hskin` 文件。
-3. 长按 `.hskin` →「共享」→「仓输入法」，在仓的「键盘皮肤」中选择「原生·清晰」，并确认已启用皮肤。
-4. **继续保持「键盘设置 → 候选栏设置 → 显示候选 Comment」开启**，否则英文释义依然不可见。
+2. 在 iPhone「文件」中**仅解压 GitHub 下载的外层 ZIP 一次**，取得里面的 `native-clear-ios.hskin`。**不要再解压 `.hskin` 本身！** 这是一个虽然内部采用 ZIP、但应当作为独立皮肤安装包共享的文件。
+3. 在「文件」App 中长按 `native-clear-ios.hskin` →「共享」→「仓输入法」或「用仓打开」。**不要把 `.hskin` 当作输入方案 ZIP 导入 RIME，也不要把里面的 `dark/`、`light/` 文件夹分别导入键盘皮肤。**
+4. 在仓的「键盘皮肤」中应该只出现一个名为「原生·清晰」的项目（而不是独立的「dark」「light」），选中并启用。
+5. **继续保持「键盘设置 → 候选栏设置 → 显示候选 Comment」开启**，否则英文释义依然不可见。
+
+**报错：`config.yaml` 不存在，同时皮肤列表出现 `dark`、`light` 两项。** 这代表明暗子目录被当成了皮肤根目录。删除误导入的这两项，然后按照上面的步骤从 iOS「文件」共享**未解压的 `.hskin` 文件**给仓。完整皮肤的目录结构必须是：
+
+```text
+native-clear-ios.hskin   ← 作为整个文件分享给仓（不要解压）
+├── config.yaml          ← 位于 .hskin ZIP 根目录
+├── light/
+│   └── qwerty_portrait.yaml
+└── dark/
+    └── qwerty_portrait.yaml
+```
+
+构建产物还附带 `native-clear-ios-folder.zip`，供熟悉仓文件管理的高级用户在需要手动复制**完整皮肤文件夹**时使用；其内部多一层 `native-clear-ios/` 目录，不要将它误认为官方标准的 `.hskin` 文件。
  
 此皮肤不会更改 `wubi86_qj` 的输入词库，也不绑定别的拼音方案。首次版本通过静态配置检查，但尚未在实际 iPhone 上验证皮肤导入与具体显示效果；若布局偏移或功能键失效，请暂时切回原皮肤并反馈截图。
  
