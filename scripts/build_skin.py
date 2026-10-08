@@ -11,22 +11,25 @@ import json
 import zipfile
 from pathlib import Path
 
+# Reference: user screenshot of compact iPhone keyboard, not Apple's assets.
+# The very low-alpha board lets iOS' native background blur show through.
 LIGHT = {
-    "key": "FFFFFF", "pressed": "D5D8DF", "function": "ADB5C0",
-    "function_pressed": "919AA8", "ink": "20232B", "muted": "606979",
-    "board": "E4E6EB", "border": "C4C7CE", "edge": "9BA1AA",
-    "enter": "397DDB", "enter_pressed": "296FC6", "enter_ink": "FFFFFF",
-    "comment": "5B6779", "preferred": "161A22", "candidate_bg": "E5EAF2",
+    "key": "FFFFFF", "pressed": "E6E7EB", "function": "B6BEC9",
+    "function_pressed": "A0A9B7", "ink": "222328", "muted": "76777D",
+    "board": "D1D5DB03", "border": "BFC3CB", "edge": "8C919A",
+    "enter": "B6BEC9", "enter_pressed": "A0A9B7", "enter_ink": "222328",
+    "comment": "6B6F78", "preferred": "222328", "candidate_bg": "FFFFFF16",
 }
 DARK = {
-    "key": "56575F", "pressed": "777982", "function": "3C414C",
-    "function_pressed": "555C69", "ink": "F7F7FA", "muted": "BBC1CD",
-    "board": "2C2D34", "border": "24252D", "edge": "23242A",
-    "enter": "3985E8", "enter_pressed": "2C70CD", "enter_ink": "FFFFFF",
-    "comment": "B9C1CF", "preferred": "FFFFFF", "candidate_bg": "3E4857",
+    "key": "4A4A4E", "pressed": "66666A", "function": "58595E",
+    "function_pressed": "6B6C71", "ink": "F5F5F7", "muted": "D0D0D5",
+    "board": "2C2C2E03", "border": "28282A", "edge": "29292D",
+    "enter": "58595E", "enter_pressed": "6B6C71", "enter_ink": "F5F5F7",
+    "comment": "C3C4C9", "preferred": "F9F9FC", "candidate_bg": "FFFFFF0C",
 }
 
-LETTER_ROWS = ("QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM")
+LETTER_ROWS = ("qwertyuiop", "asdfghjkl", "zxcvbnm")
+EMOJI_ROWS = ("😀😁😂🤣😊🥰😍😘🙂😉", "😭😅😎🤔😴😇🥳🤩😋😢", "👍👏🙏💪❤️🔥🎉✅💯💡")
 NUMERIC_ROWS = (
     "1234567890", "@#$%&*-+()", "!?/:;.,'\"",
 )
@@ -49,27 +52,20 @@ def row(items: list[tuple[str, float]]) -> dict:
 def make_keyboard(palette: dict, kind: str, landscape: bool = False) -> dict:
     dark = palette is DARK
     result: dict = {
-        "preeditHeight": 18 if landscape else 24,
-        "toolbarHeight": 40 if landscape else 48,
-        "keyboardHeight": 164 if landscape else 224,
+        "preeditHeight": 12 if landscape else 10,
+        "toolbarHeight": 27 if landscape else 34,
+        "keyboardHeight": 158 if landscape else 200,
         "preedit": {"foregroundStyle": "preeditText", "insets": {"left": 10, "top": 2}},
         "preeditText": {"textColor": palette["muted"], "fontSize": 14, "fontWeight": "medium"},
         "toolbar": {
-            "primaryButtonStyle": "toolbarMenu",
+            "primaryButtonStyle": "toolbarSymbol0",
+            "secondaryButtonStyle": ["toolbarSymbol1", "toolbarSymbol2", "toolbarSymbol3",
+                                     "toolbarSymbol4", "toolbarSymbol5"],
             "horizontalCandidateStyle": "horizontalCandidates",
             "verticalCandidateStyle": "verticalCandidates",
         },
-        "toolbarMenu": {
-            "backgroundStyle": "toolbarButtonBackground",
-            "foregroundStyle": "toolbarMenuLabel",
-            "action": {"shortcutCommand": "#方案切换"},
-        },
         "toolbarButtonBackground": {
-            "normalColor": palette["board"], "highlightColor": palette["pressed"],
-        },
-        "toolbarMenuLabel": {
-            "text": "⌘", "normalColor": palette["muted"],
-            "fontSize": 16, "fontWeight": "semibold", "center": {"y": 0.60},
+            "normalColor": "00000000", "highlightColor": "FFFFFF12",
         },
         "horizontalCandidates": {
             "insets": {"left": 5, "right": 4},
@@ -79,8 +75,8 @@ def make_keyboard(palette: dict, kind: str, landscape: bool = False) -> dict:
             "textColor": palette["ink"], "commentColor": palette["comment"],
             "indexColor": palette["muted"], "preferredIndexColor": palette["muted"],
             "highlightBackgroundColor": palette["function"],
-            "textFontSize": 18.5, "textFontWeight": "semibold",
-            "commentFontSize": 12.5, "commentFontWeight": "medium",
+            "textFontSize": 18, "textFontWeight": "medium",
+            "commentFontSize": 11.5, "commentFontWeight": "medium",
             "indexFontSize": 10, "indexFontWeight": "medium",
             "itemSpacing": 10,
         },
@@ -95,33 +91,33 @@ def make_keyboard(palette: dict, kind: str, landscape: bool = False) -> dict:
             "preferredCommentColor": palette["comment"],
             "textColor": palette["ink"], "commentColor": palette["comment"],
             "preferredIndexColor": palette["muted"], "indexColor": palette["muted"],
-            "textFontSize": 19, "textFontWeight": "semibold",
+            "textFontSize": 18, "textFontWeight": "medium",
             "commentFontSize": 13, "commentFontWeight": "medium",
             "indexFontSize": 11, "indexFontWeight": "medium",
         },
         "letterBackground": {
             "type": "original",
-            "insets": {"top": 4, "bottom": 5, "left": 2.5, "right": 2.5},
+            "insets": {"top": 5, "bottom": 5, "left": 3, "right": 3},
             "normalColor": palette["key"], "highlightColor": palette["pressed"],
-            "cornerRadius": 6.5, "normalLowerEdgeColor": palette["edge"],
+            "cornerRadius": 8.5, "normalLowerEdgeColor": palette["edge"],
         },
         "functionBackground": {
             "type": "original",
-            "insets": {"top": 4, "bottom": 5, "left": 2.5, "right": 2.5},
+            "insets": {"top": 5, "bottom": 5, "left": 3, "right": 3},
             "normalColor": palette["function"], "highlightColor": palette["function_pressed"],
-            "cornerRadius": 6.5, "normalLowerEdgeColor": palette["edge"],
+            "cornerRadius": 8.5, "normalLowerEdgeColor": palette["edge"],
         },
         "spaceBackground": {
             "type": "original",
-            "insets": {"top": 4, "bottom": 5, "left": 2.5, "right": 2.5},
+            "insets": {"top": 5, "bottom": 5, "left": 3, "right": 3},
             "normalColor": palette["key"], "highlightColor": palette["pressed"],
-            "cornerRadius": 6.5, "normalLowerEdgeColor": palette["edge"],
+            "cornerRadius": 8.5, "normalLowerEdgeColor": palette["edge"],
         },
         "enterBackground": {
             "type": "original",
-            "insets": {"top": 4, "bottom": 5, "left": 2.5, "right": 2.5},
+            "insets": {"top": 5, "bottom": 5, "left": 3, "right": 3},
             "normalColor": palette["enter"], "highlightColor": palette["enter_pressed"],
-            "cornerRadius": 6.5, "normalLowerEdgeColor": palette["edge"],
+            "cornerRadius": 8.5, "normalLowerEdgeColor": palette["edge"],
         },
     }
     # Official Hamster v2 layout requires a keyboardStyle entry for the region.
@@ -134,6 +130,19 @@ def make_keyboard(palette: dict, kind: str, landscape: bool = False) -> dict:
     }
     result["toolbar"]["backgroundStyle"] = "keyboardBackground"
     result["preedit"]["backgroundStyle"] = "keyboardBackground"
+    # Small native-style punctuation toolbar, replacing the oversized lone ⌘.
+    for index, symbol in enumerate(("?", "，", "。", "!", "、", "……")):
+        button_name = f"toolbarSymbol{index}"
+        result[button_name] = {
+            "backgroundStyle": "toolbarButtonBackground",
+            "foregroundStyle": button_name + "Text",
+            "action": {"symbol": symbol},
+        }
+        result[button_name + "Text"] = {
+            "text": symbol, "normalColor": palette["muted"],
+            "highlightColor": palette["ink"], "fontSize": 16,
+            "fontWeight": "medium", "center": {"y": 0.53},
+        }
     rows: list[dict] = []
     def add_button(name: str, label: str, action: object, style: str,
                    width: float, font_size: float = 21) -> tuple[str, float]:
@@ -143,7 +152,7 @@ def make_keyboard(palette: dict, kind: str, landscape: bool = False) -> dict:
             "normalColor": palette["enter_ink"] if style == "enter" else palette["ink"],
             "highlightColor": palette["enter_ink"] if style == "enter" else palette["ink"],
             "fontSize": font_size,
-            "fontWeight": "semibold" if style in ("letter", "enter") else "medium",
+            "fontWeight": "medium",
             "center": {"x": 0.5, "y": 0.60 if len(label) <= 1 else 0.62},
         }
         return name, width
@@ -155,26 +164,26 @@ def make_keyboard(palette: dict, kind: str, landscape: bool = False) -> dict:
             result_row.append(add_button(
                 f"k{row_index}_{position}", label, {"character": char.lower()}
                 if kind == "qwerty" else {"symbol": char},
-                "letter", width, 21.5 if kind == "qwerty" else 19,
+                "letter", width, 21 if kind == "qwerty" else 18.5,
             ))
         return result_row
 
     if kind == "qwerty":
-        rows.append(row(add_text_row(LETTER_ROWS[0], 0, .1, True)))
+        rows.append(row(add_text_row(LETTER_ROWS[0], 0, .1)))
         items = []
         # Two small transparent outer cells match iPhone's staggered second row.
         result["leftIndent"] = {"size": {"width": {"percentage": .05}}}
         result["rightIndent"] = {"size": {"width": {"percentage": .05}}}
         items.append(("leftIndent", .05))
-        items += add_text_row(LETTER_ROWS[1], 1, .1, True)
+        items += add_text_row(LETTER_ROWS[1], 1, .1)
         items.append(("rightIndent", .05))
         rows.append(row(items))
         items = [add_button("shiftKey", "⇧", "shift", "function", .15, 23)]
-        items += add_text_row(LETTER_ROWS[2], 2, .1, True)
+        items += add_text_row(LETTER_ROWS[2], 2, .1)
         items.append(add_button("deleteKey", "⌫", "backspace", "function", .15, 24))
         rows.append(row(items))
     else:
-        texts = NUMERIC_ROWS if kind == "numeric" else SYMBOL_ROWS
+        texts = NUMERIC_ROWS if kind == "numeric" else SYMBOL_ROWS if kind == "symbolic" else EMOJI_ROWS
         for i, text in enumerate(texts):
             has_delete = i == len(texts) - 1
             width = (0.85 if has_delete else 1.0) / len(text)
@@ -187,21 +196,40 @@ def make_keyboard(palette: dict, kind: str, landscape: bool = False) -> dict:
                 result_row.append(add_button("deleteKey", "⌫", "backspace", "function", .15, 24))
             rows.append(row(result_row))
 
-    # The bottom row retains the essential iOS function keys in every mode.
+    # Screenshot-matched bottom row: compact 123, emoji, wide space, neutral return.
     bottom = []
     if kind == "qwerty":
-        bottom.append(add_button("numbersKey", "123", {"keyboardType": "numeric"}, "function", .17, 15))
-        bottom.append(add_button("languageKey", "中/英", {"shortcutCommand": "#中英切换"}, "function", .15, 13))
+        bottom.append(add_button("numbersKey", "123", {"keyboardType": "numeric"}, "function", .12, 15))
+        bottom.append(add_button("emojiKey", "☺", {"keyboardType": "emoji"}, "function", .12, 20))
     elif kind == "numeric":
-        bottom.append(add_button("backKey", "ABC", {"keyboardType": "pinyin"}, "function", .17, 15))
-        bottom.append(add_button("symbolsKey", "#+=", {"keyboardType": "symbolic"}, "function", .15, 15))
+        bottom.append(add_button("backKey", "ABC", {"keyboardType": "pinyin"}, "function", .12, 14))
+        bottom.append(add_button("symbolsKey", "#+=", {"keyboardType": "symbolic"}, "function", .12, 15))
+    elif kind == "symbolic":
+        bottom.append(add_button("backKey", "ABC", {"keyboardType": "pinyin"}, "function", .12, 14))
+        bottom.append(add_button("numbersKey", "123", {"keyboardType": "numeric"}, "function", .12, 15))
     else:
-        bottom.append(add_button("backKey", "ABC", {"keyboardType": "pinyin"}, "function", .17, 15))
-        bottom.append(add_button("numbersKey", "123", {"keyboardType": "numeric"}, "function", .15, 15))
-    bottom.append(add_button("globeKey", "◎", "nextKeyboard", "function", .11, 21))
-    bottom.append(add_button("spaceKey", "空格", "space", "space", .38, 13))
-    bottom.append(add_button("enterKey", "↵", "enter", "enter", .19, 23))
+        bottom.append(add_button("backKey", "ABC", {"keyboardType": "pinyin"}, "function", .12, 14))
+        bottom.append(add_button("numbersKey", "123", {"keyboardType": "numeric"}, "function", .12, 15))
+    bottom.append(add_button("spaceKey", "", "space", "space", .53, 14))
+    bottom.append(add_button("enterKey", "↵", "enter", "enter", .23, 25))
     rows.append(row(bottom))
+    # On iPhone the system already provides a globe key below the keyboard.
+    # Avoid duplicating it in the Rime-controlled row.
+    if kind == "qwerty":
+        result["spaceKey"]["foregroundStyle"] = ["spaceKeyForeground", "spaceHint"]
+        result["spaceHint"] = {
+            "text": "五笔", "normalColor": palette["muted"], "highlightColor": palette["muted"],
+            "fontSize": 10.5, "fontWeight": "regular", "center": {"x": .87, "y": .84},
+        }
+    for ref, sf in (("shiftKey","shift"), ("deleteKey","delete.left"), ("enterKey","return"),
+                    ("emojiKey","face.smiling")):
+        if ref in result:
+            fg = result[ref]["foregroundStyle"]
+            result[fg].pop("text", None)
+            result[fg]["systemImageName"] = sf
+            result[fg]["fontSize"] = 20 if ref != "enterKey" else 22
+    if "numbersKey" in result:
+        result["numbersKey"]["swipeDownAction"] = {"shortcutCommand": "#RimeSwitcher"}
     result["keyboardLayout"] = rows
     return result
 
@@ -221,6 +249,7 @@ def make_manifest() -> dict:
         "alphabetic": locations("qwerty"),
         "numeric": locations("numeric"),
         "symbolic": locations("symbolic"),
+        "emoji": locations("emoji"),
     }
 
 def serialized(data: dict) -> bytes:
@@ -232,7 +261,7 @@ def make_files() -> dict[str, bytes]:
     files = {"config.yaml": serialized(make_manifest())}
     for mode, palette in (("light", LIGHT), ("dark", DARK)):
         files[mode + "/resources/"] = b""
-        for kind in ("qwerty", "numeric", "symbolic"):
+        for kind in ("qwerty", "numeric", "symbolic", "emoji"):
             for orientation in ("portrait", "landscape"):
                 name = f"{mode}/{kind}_{orientation}.yaml"
                 files[name] = serialized(make_keyboard(palette, kind, orientation == "landscape"))
@@ -240,9 +269,9 @@ def make_files() -> dict[str, bytes]:
 
 def validate(files: dict[str, bytes]) -> None:
     manifest = json.loads(files["config.yaml"])
-    assert set(("pinyin", "alphabetic", "numeric", "symbolic")).issubset(manifest)
+    assert set(("pinyin", "alphabetic", "numeric", "symbolic", "emoji")).issubset(manifest)
     for mode in ("light", "dark"):
-        for group in ("pinyin", "alphabetic", "numeric", "symbolic"):
+        for group in ("pinyin", "alphabetic", "numeric", "symbolic", "emoji"):
             for device, selections in manifest[group].items():
                 for orientation, stem in selections.items():
                     path = f"{mode}/{stem}.yaml"
@@ -251,6 +280,15 @@ def validate(files: dict[str, bytes]) -> None:
                     assert len(doc["keyboardLayout"]) == 4
                     assert doc["toolbar"]["horizontalCandidateStyle"] == "horizontalCandidates"
                     assert doc["horizontalCandidates"]["commentFontWeight"] == "medium"
+                    assert doc["toolbarHeight"] <= 34
+                    assert doc["preeditHeight"] <= 12
+                    assert doc["keyboardHeight"] <= 200
+                    assert doc["keyboardBackground"]["normalColor"].endswith("03")
+                    assert doc["enterBackground"]["normalColor"] == doc["functionBackground"]["normalColor"]
+                    assert doc["toolbar"]["primaryButtonStyle"] == "toolbarSymbol0"
+                    assert len(doc["toolbar"]["secondaryButtonStyle"]) == 5
+                    assert "globeKey" not in doc
+                    assert doc["k0_0Foreground"]["text"] in ("q", "1", "[", "😀")
                     for row_def in doc["keyboardLayout"]:
                         refs = [c["Cell"] for c in row_def["HStack"]["subviews"]]
                         for ref in refs:
@@ -292,7 +330,7 @@ def main() -> None:
     files = make_files()
     validate(files)
     if args.check:
-        print("PASS skin validation: 12 keyboard configurations + manifest, no unresolved keys")
+        print("PASS skin validation: 16 light/dark/orientation configs, 4 keyboard types, all key references")
         return
     official = Path(args.output)
     # Confirmed from published, working 26键-万象.hskin by BlackCCCat:
