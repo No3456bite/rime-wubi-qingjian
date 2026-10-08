@@ -1,0 +1,27 @@
+name: Build Hamster Wubi86 + English Gloss
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+      - name: Install OpenCC dictionary tool
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends opencc
+      - name: Test packager
+        run: python3 -m unittest discover -s tests -v
+      - name: Build installable package
+        run: python3 scripts/build.py
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: hamster-wubi86-qingjian
+          path: dist/hamster-wubi86-qingjian.zip
+          if-no-files-found: error
+          retention-days: 90
