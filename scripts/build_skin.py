@@ -251,24 +251,43 @@ def validate(files: dict[str, bytes]) -> None:
                     assert doc["enterKey"]["action"] == "enter"
                     assert doc["deleteKey"]["action"] == "backspace"
 
+def pack(output: Path, files: dict[str, bytes], prefix: str = "") -> None:
+    """Make a real .hskin or a folder-wrapped ZIP for manual file-manager imports."""
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as z:
+        # Include explicit root directories: some iOS ZIP importers don't infer them.
+        for dirname in ("light/", "dark/", "light/resources/", "dark/resources/"):
+            z.writestr(prefix + dirname, b"")
+        if prefix:
+            z.writestr(prefix, b"")
+        for name, content in files.items():
+            if name.endswith("/"):
+                continue
+            z.writestr(prefix + name, content)
+    with zipfile.ZipFile(output) as z:
+        assert z.testzip() is None
+        assert (prefix + "config.yaml") in z.namelist()
+        assert (prefix + "light/qwerty_portrait.yaml") in z.namelist()
+        assert (prefix + "dark/qwerty_portrait.yaml") in z.namelist()
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--check", action="store_true")
     p.add_argument("--output", default="dist/native-clear-ios.hskin")
+    p.add_argument("--folder-output", default="dist/native-clear-ios-folder.zip")
     args = p.parse_args()
     files = make_files()
     validate(files)
     if args.check:
         print("PASS skin validation: 12 keyboard configurations + manifest, no unresolved keys")
         return
-    output = Path(args.output)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as z:
-        for name, content in files.items():
-            z.writestr(name, content)
-    with zipfile.ZipFile(output) as z:
-        assert z.testzip() is None
-    print(f"Built {output} ({output.stat().st_size:,} bytes)")
+    official = Path(args.output)
+    folder_zip = Path(args.folder_output)
+    pack(official, files)  # Canonical .hskin, root-level config.yaml. Share to Hamster.
+    pack(folder_zip, files, "native-clear-ios/")  # Folder import fallback.
+    print(f"Built {official} ({official.stat().st_size:,} bytes)")
+    print(f"Built {folder_zip} ({folder_zip.stat().st_size:,} bytes)")
 
 if __name__ == "__main__":
     main()
