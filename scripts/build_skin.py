@@ -166,12 +166,15 @@ def make_keyboard(palette: dict, kind: str, landscape: bool = False) -> dict:
     else:
         texts = NUMERIC_ROWS if kind == "numeric" else SYMBOL_ROWS
         for i, text in enumerate(texts):
-            width = 1/len(text)
+            has_delete = i == len(texts) - 1
+            width = (0.85 if has_delete else 1.0) / len(text)
             result_row = []
             for j, char in enumerate(text):
                 result_row.append(add_button(
                     f"k{i}_{j}", char, {"symbol": char}, "letter", width, 19.5,
                 ))
+            if has_delete:
+                result_row.append(add_button("deleteKey", "⌫", "backspace", "function", .15, 24))
             rows.append(row(result_row))
 
     # The bottom row retains the essential iOS function keys in every mode.
@@ -246,7 +249,7 @@ def validate(files: dict[str, bytes]) -> None:
                         assert abs(sum(sized) - 1) < 1e-6, (path, sum(sized))
                     assert doc["spaceKey"]["action"] == "space"
                     assert doc["enterKey"]["action"] == "enter"
-                    assert doc["deleteKey"]["action"] == "backspace" if stem.startswith("qwerty") else True
+                    assert doc["deleteKey"]["action"] == "backspace"
 
 def main() -> None:
     p = argparse.ArgumentParser()
