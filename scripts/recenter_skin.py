@@ -40,6 +40,9 @@ def transform(source: Path, output: Path) -> None:
         roots = {name.split("/")[0] for name in files if name.strip("/")}
         if len(roots) != 1 or next(iter(roots)) + "/config.yaml" not in files:
             raise ValueError("A single skin directory containing config.yaml is required")
+        root = next(iter(roots))
+        if root != "native-clear-ios-v5":
+            raise ValueError("This v6 patch expects the native-clear-ios-v5 skin")
         for entry in original.infolist():
             content = original.read(entry.filename)
             if entry.filename.endswith(".yaml") and (
@@ -52,7 +55,12 @@ def transform(source: Path, output: Path) -> None:
                     letters += lc
                 others += oc
                 content = (json.dumps(document, ensure_ascii=False, indent=2) + "\n").encode()
-            result.writestr(entry, content)
+            if entry.filename == root + "/config.yaml":
+                manifest = json.loads(content)
+                manifest["name"] = "原生·清晰 v6 / Native Clear v6"
+                content = (json.dumps(manifest, ensure_ascii=False, indent=2) + "\n").encode()
+            destination = entry.filename.replace(root + "/", "native-clear-ios-v6/", 1)
+            result.writestr(destination, content)
     with ZipFile(output) as z:
         if z.testzip() is not None:
             raise ValueError("ZIP archive integrity check failed")
