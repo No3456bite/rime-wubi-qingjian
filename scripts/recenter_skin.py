@@ -56,7 +56,7 @@ def transform(source: Path, output: Path) -> None:
     with ZipFile(output) as z:
         if z.testzip() is not None:
             raise ValueError("ZIP archive integrity check failed")
-    if layouts != 4 or letters != 104 or others != 12:
+    if layouts != 4 or letters != 104 or others != 48:
         raise ValueError(f"Unexpected patch coverage: {layouts} layouts, {letters} letters, {others} labels")
     print(f"PASS {layouts} QWERTY layouts / {letters} letter labels / {others} function labels")
     print(f"Written: {output}")
